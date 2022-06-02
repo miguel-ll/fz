@@ -22,9 +22,8 @@ void resize_choices(int new_capacity){
 	choices_sorted = realloc(choices_sorted, new_capacity * sizeof(size_t));
 
 	int i = choices_capacity;
-	for(; i < new_capacity; i++){
+	for(; i < new_capacity; i++)
 		choices[i] = NULL;
-	}
 	choices_capacity = new_capacity;
 }
 
@@ -45,7 +44,6 @@ void read_choices(){
 			*nl = '\0';
 
 		add_choice(line);
-
 		line = NULL;
 	}
 	free(line);
@@ -69,8 +67,7 @@ static int cmpchoice(const void *p1, const void *p2) {
 }
 
 void run_search(char *needle){
-	current_selection = 0;
-	choices_available = 0;
+	current_selection = 0; choices_available = 0;
 	int i;
 	for(i = 0; i < choices_n; i++){
 		if(has_match(needle, choices[i])){
@@ -78,7 +75,6 @@ void run_search(char *needle){
 			choices_sorted[choices_available++] = i;
 		}
 	}
-
 	qsort(choices_sorted, choices_available, sizeof(size_t), cmpchoice);
 }
 
@@ -116,9 +112,7 @@ void draw_match(tty_t *tty, const char *choice, int selected){
 		if(positions[p] == i){
 			tty_setfg(tty, TTY_COLOR_HIGHLIGHT);
 			p++;
-		}else{
-			tty_setfg(tty, TTY_COLOR_NORMAL);
-		}
+		} else { tty_setfg(tty, TTY_COLOR_NORMAL); }
 		tty_printf(tty, "%c", choice[i]);
 	}
 	tty_setnormal(tty);
@@ -148,27 +142,17 @@ void draw(tty_t *tty){
 	tty_flush(tty);
 }
 
-void emit(tty_t *tty){
-	/* ttyout should be flushed before outputting on stdout */
+void emit(tty_t *tty) { /* ttyout should be flushed before outputting on stdout */
 	fclose(tty->fout);
-
-	if(choices_available){
-		/* output the selected result */
-		printf("%s\n", choices[choices_sorted[current_selection]]);
-	}else{
-		/* no match, output the query instead */
-		printf("%s\n", search);
-	}
+	if(choices_available)
+		printf("%s\n", choices[choices_sorted[current_selection]]); /* output the selected result */
+	else
+		printf("%s\n", search); /* no match, output the query instead */
 	exit(EXIT_SUCCESS);
 }
 
-void action_prev(){
-	current_selection = (current_selection + choices_available - 1) % choices_available;
-}
-
-void action_next(){
-	current_selection = (current_selection + 1) % choices_available;
-}
+void action_prev(){ current_selection = (current_selection + choices_available - 1) % choices_available; }
+void action_next(){ current_selection = (current_selection + 1) % choices_available; }
 
 void run(tty_t *tty){
 	run_search(search);
@@ -189,12 +173,6 @@ void run(tty_t *tty){
 		}else if(ch == 21){ /* C-U */
 			search_size = 0;
 			search[0] = '\0';
-			run_search(search);
-		}else if(ch == 23){ /* C-W */
-			if(search_size)
-				search[--search_size] = '\0';
-			while(search_size && !isspace(search[--search_size]))
-				search[search_size] = '\0';
 			run_search(search);
 		}else if(ch == 14){ /* C-N */
 			action_next();
